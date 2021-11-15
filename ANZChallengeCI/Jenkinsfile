@@ -1,23 +1,26 @@
 node {
-    
-    
+
         stage('Stage Build') {
             
-                echo 'Building ANZ Challenge App!' 
-            stage('Build Java'){
+         echo 'Building ANZ Challenge App!' 
+            stage('Build Java and Docker Image'){
                 deleteDir()
                 checkout([$class: 'GitSCM', branches:[[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/DJEnterprise/anzchallenge.git"]]])
                 sh """ 
                 ./gradlew build
+                aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 621255284514.dkr.ecr.ap-southeast-2.amazonaws.com
+                docker build -t mydockerrepo .
+                docker tag mydockerrepo:latest 621255284514.dkr.ecr.ap-southeast-2.amazonaws.com/mydockerrepo:latest
+                docker push 621255284514.dkr.ecr.ap-southeast-2.amazonaws.com/mydockerrepo:latest
                 """
                 }
-            stage('Build Docker Image'){
+            stage('Pull and Run Docker Image'){
                 sh """
-                docker login public.ecr.aws/f2j1q9q9/anzchallenge
-                docker build -t anzchallenge .
-                docker push
+                aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin 621255284514.dkr.ecr.ap-southeast-2.amazonaws.com
+                docker pull 621255284514.dkr.ecr.ap-southeast-2.amazonaws.com/mydockerrepo:latest
+                docker-compose up -d
                 """
             }
-            }
+        }
 }
     
