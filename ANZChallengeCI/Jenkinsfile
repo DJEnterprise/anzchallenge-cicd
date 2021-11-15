@@ -12,7 +12,11 @@ node {
                 """
                 }
             stage('Build Docker Image'){
-                
+                sh """
+                docker login public.ecr.aws/f2j1q9q9/anzchallenge
+                docker build -t anzchallenge .
+                docker push
+                """
             }
             }
 }
