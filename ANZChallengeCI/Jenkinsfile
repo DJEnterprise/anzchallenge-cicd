@@ -5,7 +5,11 @@ node {
             
                 echo 'Building ANZ Challenge App!' 
                 deleteDir()
-                checkout([$class: 'GitSCM', branches:[[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "git@github.com:DJEnterprise/anzchallenge.git"]]])
+                sh """
+                id
+                pwd
+                """
+                checkout([$class: 'GitSCM', branches:[[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/DJEnterprise/anzchallenge.git"]]])
                 sh """ 
                 pwd
 
