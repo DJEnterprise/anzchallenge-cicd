@@ -1,10 +1,19 @@
-pipeline {
-    agent any 
-    stages {
+node {
+    
+    
         stage('Stage Build') {
-            steps {
+            
                 echo 'Building ANZ Challenge App!' 
+                deleteDir()
+                checkout([$class: 'GitSCM', branches:[[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "git@github.com:DJEnterprise/anzchallenge.git"]]])
+                sh """ 
+                pwd
+
+                id
+
+                ./gradlew build
+
+                """
             }
-        }
-    }
 }
+    
