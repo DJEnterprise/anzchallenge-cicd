@@ -4,20 +4,16 @@ node {
         stage('Stage Build') {
             
                 echo 'Building ANZ Challenge App!' 
+            stage('Build Java'){
                 deleteDir()
-                sh """
-                id
-                pwd
-                """
                 checkout([$class: 'GitSCM', branches:[[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/DJEnterprise/anzchallenge.git"]]])
                 sh """ 
-                pwd
-
-                id
-
                 ./gradlew build
-
                 """
+                }
+            stage('Build Docker Image'){
+                
+            }
             }
 }
     
