@@ -8,7 +8,7 @@ node {
                 checkout([$class: 'GitSCM', branches:[[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/DJEnterprise/anzchallengeiac.git"]]])
                 sh """ 
                 cd terraform/anzchallenge
-                terraform init
+                terraform init -backend-config-bucket=anzchallenge -backend-config=key=anzchallenge/app.tfstate -backend-config=region=ap-southeast-2
                 terraform apply \
                 -var-file=\"nonprod.tfvars\" \
                 -auto-approve
