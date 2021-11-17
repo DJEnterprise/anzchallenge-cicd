@@ -11,7 +11,7 @@ node {
                 terraform init
                 terraform apply \
                 -var-file=\"nonprod.tfvars\" \
-                -autoapprove
+                -auto-approve
                 """
                 }
         }
