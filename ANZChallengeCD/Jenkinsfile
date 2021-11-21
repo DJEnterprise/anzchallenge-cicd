@@ -9,7 +9,7 @@ node {
        stage('Get Docker Image Version'){
                echo "Getting the latest commit hast for the deployment"
                checkout([$class: 'GitSCM', branches:[[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/DJEnterprise/anzchallenge.git"]]])    
-                git_commit_hash = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+                env.git_commit_hash = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
        }
 
         stage('Stage Build Infrastructure') {
