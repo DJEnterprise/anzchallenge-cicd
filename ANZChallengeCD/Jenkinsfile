@@ -1,19 +1,48 @@
 node {
+   
+       properties([parameters([string(defaultValue: '621255284514.dkr.ecr.ap-southeast-2.amazonaws.com', name: 'DOCKER_REPO_URL', trim: true), 
+                             string(defaultValue: 'mydockerrepo', name: 'DOCKER_IMAGE_NAME', trim: true),
+                              string(defaultValue: 'anzchallenge', name: 'S3_BUCKET_NAME', trim: true)])])
+        
+       def git_commit_hash = ''
+
+       stage('Get Docker Image Version'){
+               echo "Getting the latest commit hast for the deployment"
+               checkout([$class: 'GitSCM', branches:[[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/DJEnterprise/anzchallenge.git"]]])    
+                git_commit_hash = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+       }
 
         stage('Stage Build Infrastructure') {
             
          echo 'Building Infrastructure for ANZ Challenge App!' 
-            stage('Build EKS'){
+            
+              stage('Terraform Plan'){             
                 deleteDir()
                 checkout([$class: 'GitSCM', branches:[[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/DJEnterprise/anzchallengeiac.git"]]])
                 sh """ 
                 cd terraform/anzchallenge
-                terraform init -backend-config=bucket=anzchallenge -backend-config=key=anzchallenge/app.tfstate -backend-config=region=ap-southeast-2
-                terraform apply \
+                terraform init -backend-config=bucket=${S3_BUCKET_NAME} -backend-config=key=anzchallenge/app.tfstate -backend-config=region=ap-southeast-2
+                
+                terraform plan -input=false -out tfplan \
                 -var-file=\"nonprod.tfvars\" \
-                -auto-approve
-                """
-                }
+                -var container_image_name=${DOCKER_REPO_URL}/${DOCKER_IMAGE_NAME}:${git_commit_hash}
+
+                terraform show tfplan >> tfplan.txt
+                """}
+              
+              stage('Terraform Approval'){
+               def plan = readFile 'terraform/anzchallenge/tfplan.txt'
+                input message: "Do you want to apply the plan?",
+                    parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+              }
+              
+             stage('Terraform Apply'){
+                 sh """
+                 cd terraform/anzchallenge
+                 terraform apply -input=false tfplan
+                 """
+             }
+            
         }
+
 }
-    
