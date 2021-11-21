@@ -12,11 +12,11 @@ node {
                 deleteDir()
                 checkout([$class: 'GitSCM', branches:[[name: "master"]], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[url: "https://github.com/DJEnterprise/anzchallenge.git"]]])    
                 git_commit_hash = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-                echo "Docker Image Version ${DOCKER_IMAGE_NAME}:${git_commit_hash}"
+                echo "Docker Image Version ${env.DOCKER_IMAGE_NAME}:${env.git_commit_hash}"
                 sh """
-                aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin ${DOCKER_REPO_URL}
+                aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin ${env.DOCKER_REPO_URL}
                 """
-                docker_image_status = sh(script: """docker pull ${DOCKER_REPO_URL}/${DOCKER_IMAGE_NAME}:${git_commit_hash} > /dev/null && echo 1|| echo 0""", returnStdout: true).trim()
+                docker_image_status = sh(script: """docker pull ${env.DOCKER_REPO_URL}/${env.DOCKER_IMAGE_NAME}:${env.git_commit_hash} > /dev/null && echo 1|| echo 0""", returnStdout: true).trim()
             }
 
         if(docker_image_status == '0'){
@@ -38,15 +38,15 @@ node {
                 }
             stage('Docker Build and Push to Repo'){
                 sh """
-                aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin ${DOCKER_REPO_URL}
-                docker build -t ${DOCKER_IMAGE_NAME}:${git_commit_hash} .
-                docker tag ${DOCKER_IMAGE_NAME}:${git_commit_hash} ${DOCKER_REPO_URL}/${DOCKER_IMAGE_NAME}:${git_commit_hash}
-                docker push ${DOCKER_REPO_URL}/${DOCKER_IMAGE_NAME}:${git_commit_hash}
+                aws ecr get-login-password --region ap-southeast-2 | docker login --username AWS --password-stdin ${env.DOCKER_REPO_URL}
+                docker build -t ${env.DOCKER_IMAGE_NAME}:${env.git_commit_hash} .
+                docker tag ${env.DOCKER_IMAGE_NAME}:${env.git_commit_hash} ${env.DOCKER_REPO_URL}/${env.DOCKER_IMAGE_NAME}:${env.git_commit_hash}
+                docker push ${env.DOCKER_REPO_URL}/${env.DOCKER_IMAGE_NAME}:${env.git_commit_hash}
                 """
                 }
             
         }else {
-            echo "Docker Image Already exist for commit ${git_commit_hash}"
+            echo "Docker Image Already exist for commit ${env.git_commit_hash}"
         }
 }
     
