@@ -1,6 +1,12 @@
 ANZ Challange CI-CD Pipeline Repo
 ========
 
+Requirements
+-----
+Would require below pre-requirements to run this pipeline
+1. Jenkins configured with required instance role applied to provision AWS Infrastructure
+2. Jenkins server installed with git, terraform, docker and awscli.
+
 This contains CI-CD pipeline file for Jenkins for ANZ Challange App
 
 ANZChallengeCI
@@ -26,3 +32,10 @@ ANZChallengeCD Pipeline contains following stages:
 2. Git Checkout and Terraform Plan - This will checkout the IaC from https://github.com/DJEnterprise/anzchallengeiac.git and Initiates the Terraform pointing to S3 backend and does the Terraform Plan
 3. Terraform Approva        -  This will display the output from Terraform Plan and Prompts user to approve in Jenkins before go-ahead with the Apply.
 4. Terraform Apply          -  This will do the Terraform apply to build the Infrastructure and deploy the application to Kubernetes cluster.
+
+ANZChallengeDestroy
+--------
+
+This Job is parameterized and requirees S3 Bucket Name to run the job.
+
+ANZChallengeDestroy pipeline will destroy the infrastructure created for ANZChallenge app.
