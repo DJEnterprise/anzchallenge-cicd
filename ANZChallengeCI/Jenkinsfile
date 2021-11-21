@@ -32,7 +32,8 @@ node {
             }
 
             stage('Build Code'){
-                sh """ 
+                sh """
+                sed -i "s/{{build_sha}}/${env.git_commit_hash}/g" src/main/resources/application.properties
                 ./gradlew build
                 """
                 }
